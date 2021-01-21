@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Simple Chat App</title>
+    <meta charset="utf-8"  />
+</head>
+
+<body>
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-firestore.js"></script>
+
+    <h1>Simple Chat</h1>
+
+    <label>Username:</label>
+    <input type="text" id="username" placeholder="Rick">
+    
+    <label>Message:</label>
+    <input type="text" id="message" placeholder="Hi Morty">
+    
+    <button id="send">Send</button>
+    
+    <h3>Chat Messages:</h3>
+
+    <div id="messagesContainer">
+        <!-- We will display any messages here that we send/retrieve from Firestore -->
+    </div>
+
+    <script>
+      // Your web app's Firebase configuration
+
+      var firebaseConfig = {
+        apiKey: "AIzaSyBJ30DVu_grXcGmGDlXtmXTMtUvyjc18lg",
+        authDomain: "intro-to-webdev-proj.firebaseapp.com",
+        projectId: "intro-to-webdev-proj",
+        storageBucket: "intro-to-webdev-proj.appspot.com",
+        messagingSenderId: "790606764198",
+        appId: "1:790606764198:web:b2a31d010ec8ab5ead7c67"
+      };
+
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      var firestore = firebase.firestore();
+      var collectionRef = firestore.collection('messages')
+
+      //Inputs 
+
+      var inputUsername = document.getElementById("username")
+        var inputMessage = document.getElementById("message")
+        var sendButton = document.getElementById("send")
+
+        // Output DIV
+        var messagesContainer = document.getElementById("messagesContainer")
+
+        // 
+        sendButton.addEventListener("click", () => {
+            var username = inputUsername.value;
+                var textToSave = inputMessage.value;
+
+                collectionRef.add({
+                    username: username,
+                    txt: textToSave,
+                    timestamp: Date.now()
+                }).then(() => {
+                    console.log("Message Saved!");
+                }).catch((error) => {
+                    console.log("Got and error:", error);
+                });
+            })
+
+            // Define a function to listen for real-time updates
+        var getRealTimeUpdates = () => {
+            
+            // All documents in our collection, messages, ordered from oldest to newest
+            var collectionQuery = firestore.collection('messages').orderBy('timestamp', 'asc')
+
+            collectionQuery.onSnapshot((snapshot) => {
+                console.log(snapshot)
+                
+                // Each snapshot contains one or more DocumentChange objects
+                // Loop through each document change
+                snapshot.docChanges().forEach((docChange) => {
+
+                    // Log the document change we detected
+                    console.log(docChange)
+
+                    // get the data for this document
+                    var data = docChange.doc.data()
+
+                    // Create a new div with this username and message as the content.
+                    var div = document.createElement("DIV");   // Create a new <div> element
+                    div.innerHTML = data.username + ": " + data.txt; // Insert text for our username and message
+
+                      // Append our div as a child element in our messageContainer div.
+                      messagesContainer.appendChild(div); 
+                    
+                });
+            });
+        }
+
+        // Call our function to start listening for real-time updates
+        getRealTimeUpdates();
+        
+    </script>
+</body>
+</html>
